@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  postgresql:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: postgresql
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      TZ: "Asia/Jakarta"
+      # POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      SERVICE_TAGS: dev
+      SERVICE_NAME: postgresql
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    networks:
+      - postgresql-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: app-java:1.0.0
+    container_name: app-java
+    restart: unless-stopped
+    tty: true
+    networks:
+      - postgresql-network
+
+networks:
+  postgresql-network:
+    driver: bridge
+    name: postgresql-network
+volumes:
+  postgresql-data:
+    driver: local
+    name: postgresql-data
